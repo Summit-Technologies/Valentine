@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Admin Dashboard - Valentine's Day Proposal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Playfair+Display:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=Dancing+Script:wght@400;700&family=Bebas+Neue&family=Montserrat:wght@300;400;600;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Admin Login Modal -->
+<div id="adminLogin" class="modal active">
+    <div class="modal-content">
+        <h3>Admin Access</h3>
+        <p style="color: var(--gray); margin-bottom: 1.5rem;">Enter your password to access the dashboard</p>
+        <input type="password" id="adminPassword" placeholder="Enter admin password" autofocus>
+        <button class="btn-primary" onclick="verifyAdmin()">Login</button>
+        <button class="btn-secondary" onclick="goHome()" style="margin-top: 0.5rem;">Back to Home</button>
+        <p class="hint">Default password: summit2024</p>
+    </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="adminDashboard" class="page">
+    <div class="dashboard-wrapper">
+        <div class="dashboard-header">
+            <div>
+                <h2>📊 Valentine's Dashboard</h2>
+                <p style="color: var(--gray); margin-top: 0.5rem;">Track all proposals and analytics</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn-secondary" onclick="goHome()">Home</button>
+                <button class="btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">💌</div>
+                <div class="stat-value" id="totalProposals">0</div>
+                <div class="stat-label">Total Proposals</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="acceptedProposals">0</div>
+                <div class="stat-label">Accepted</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">👀</div>
+                <div class="stat-value" id="totalViews">0</div>
+                <div class="stat-label">Total Views</div>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <button class="btn-primary" onclick="exportData()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Export Data (CSV)
+            </button>
+            <button class="btn-secondary" onclick="refreshDashboard()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Refresh Data
+            </button>
+            <button class="btn-secondary" onclick="clearAllData()" style="background: linear-gradient(135deg, #ff1744 0%, #f50057 100%); color: white;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Clear All Data
+            </button>
+        </div>
+
+        <div class="proposals-table-container">
+            <h3>Recent Proposals</h3>
+            <div class="table-wrapper">
+                <table class="proposals-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sender</th>
+                            <th>Recipient</th>
+                            <th>Template</th>
+                            <th>Status</th>
+                            <th>No Clicks</th>
+                            <th>Views</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proposalsTableBody">
+                        <!-- Dynamic rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="summit-badge" style="margin-top: 3rem; text-align: center;">
+            <p>Powered by <strong>Summit Technologies</strong></p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+<script src="script.js"></script>
+<script>
+// Admin-specific functions
+function goHome() {
+    window.location.href = 'index.html';
+}
+
+function refreshDashboard() {
+    loadDashboardData();
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Refreshed!';
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+    }, 1500);
+}
+
+// Auto-refresh every 30 seconds
+let autoRefreshInterval;
+
+function startAutoRefresh() {
+    autoRefreshInterval = setInterval(() => {
+        loadDashboardData();
+    }, 30000); // 30 seconds
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+    }
+}
+
+// Handle Enter key for password
+document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        verifyAdmin();
+    }
+});
+</script>
+</body>
+</html>

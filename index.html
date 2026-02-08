@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>💘 Valentine's Day Proposal - Summit Technologies</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Playfair+Display:wght@400;700;900&family=Quicksand:wght@300;400;600;700&family=Dancing+Script:wght@400;700&family=Bebas+Neue&family=Montserrat:wght@300;400;600;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Landing Page -->
+<div id="landingPage" class="page active">
+    <div class="landing-bg"></div>
+    <div class="floating-hearts-container"></div>
+    <div class="landing-content">
+        <div class="logo-container">
+            <div class="heart-logo">💘</div>
+        </div>
+        <h1 class="landing-title">Will You Be My Valentine?</h1>
+        <p class="landing-subtitle">Create a magical, unforgettable proposal</p>
+        <button class="btn-primary pulse" onclick="showCreator()">
+            <span>Create Your Proposal</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <div class="summit-badge">
+            <p>Powered by <strong>Summit Technologies</strong></p>
+        </div>
+    </div>
+</div>
+
+<!-- Creator Page -->
+<div id="creatorPage" class="page">
+    <div class="creator-wrapper">
+        <button class="back-btn" onclick="showLanding()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Back
+        </button>
+        
+        <div class="creator-header">
+            <h2>Create Your Valentine Proposal</h2>
+            <p>Customize every detail to make it special</p>
+        </div>
+
+        <form id="proposalForm" class="creator-form">
+            <!-- Step 1: Basic Info -->
+            <div class="form-section active" data-step="1">
+                <h3 class="section-title">📝 Basic Information</h3>
+                
+                <div class="form-group">
+                    <label for="recipientName">Their Name *</label>
+                    <input type="text" id="recipientName" required placeholder="Enter their beautiful name...">
+                </div>
+
+                <div class="form-group">
+                    <label for="senderName">Your Name (Optional)</label>
+                    <input type="text" id="senderName" placeholder="Your name (or stay anonymous)">
+                </div>
+
+                <div class="form-group">
+                    <label for="messageTemplate">Choose Your Message</label>
+                    <select id="messageTemplate" onchange="updateCustomMessage()">
+                        <option value="Will you be my Valentine?">Will you be my Valentine?</option>
+                        <option value="Be mine forever? ❤️">Be mine forever? ❤️</option>
+                        <option value="You make my heart smile 😊">You make my heart smile 😊</option>
+                        <option value="Let's make this official! 💕">Let's make this official! 💕</option>
+                        <option value="A lɛk yu bad bad! (Krio)">A lɛk yu bad bad! (Krio)</option>
+                        <option value="Yu na mi valentine! 🌹">Yu na mi valentine! 🌹</option>
+                        <option value="custom">✍️ Write Custom Message</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customMessageGroup" style="display: none;">
+                    <label for="customMessage">Your Custom Message</label>
+                    <textarea id="customMessage" rows="3" placeholder="Write your heartfelt message..."></textarea>
+                </div>
+
+                <button type="button" class="btn-primary" onclick="nextStep(2)">
+                    Next: Choose Template
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Step 2: Template Selection -->
+            <div class="form-section" data-step="2">
+                <h3 class="section-title">🎨 Choose Your Template</h3>
+                
+                <div class="templates-grid">
+                    <div class="template-card" data-template="romantic-sunset" onclick="selectTemplate('romantic-sunset')">
+                        <div class="template-preview template-romantic-sunset"></div>
+                        <h4>Romantic Sunset</h4>
+                        <p>Warm, dreamy vibes</p>
+                    </div>
+
+                    <div class="template-card" data-template="hearts-explosion" onclick="selectTemplate('hearts-explosion')">
+                        <div class="template-preview template-hearts-explosion"></div>
+                        <h4>Hearts Explosion</h4>
+                        <p>Playful & energetic</p>
+                    </div>
+
+                    <div class="template-card" data-template="elegant-rose" onclick="selectTemplate('elegant-rose')">
+                        <div class="template-preview template-elegant-rose"></div>
+                        <h4>Elegant Rose</h4>
+                        <p>Classic & sophisticated</p>
+                    </div>
+
+                    <div class="template-card" data-template="starry-night" onclick="selectTemplate('starry-night')">
+                        <div class="template-preview template-starry-night"></div>
+                        <h4>Starry Night</h4>
+                        <p>Cosmic romance</p>
+                    </div>
+
+                    <div class="template-card" data-template="candy-hearts" onclick="selectTemplate('candy-hearts')">
+                        <div class="template-preview template-candy-hearts"></div>
+                        <h4>Candy Hearts</h4>
+                        <p>Sweet & fun</p>
+                    </div>
+
+                    <div class="template-card" data-template="lumley-beach" onclick="selectTemplate('lumley-beach')">
+                        <div class="template-preview template-lumley-beach"></div>
+                        <h4>Lumley Beach</h4>
+                        <p>Sierra Leone vibes</p>
+                    </div>
+
+                    <div class="template-card" data-template="polaroid-love" onclick="selectTemplate('polaroid-love')">
+                        <div class="template-preview template-polaroid-love"></div>
+                        <h4>Polaroid Love</h4>
+                        <p>Vintage memories</p>
+                    </div>
+
+                    <div class="template-card" data-template="neon-glow" onclick="selectTemplate('neon-glow')">
+                        <div class="template-preview template-neon-glow"></div>
+                        <h4>Neon Glow</h4>
+                        <p>Modern & bold</p>
+                    </div>
+
+                    <div class="template-card" data-template="watercolor-dream" onclick="selectTemplate('watercolor-dream')">
+                        <div class="template-preview template-watercolor-dream"></div>
+                        <h4>Watercolor Dream</h4>
+                        <p>Artistic & soft</p>
+                    </div>
+
+                    <div class="template-card" data-template="confetti-party" onclick="selectTemplate('confetti-party')">
+                        <div class="template-preview template-confetti-party"></div>
+                        <h4>Confetti Party</h4>
+                        <p>Celebration mode</p>
+                    </div>
+                </div>
+
+                <input type="hidden" id="selectedTemplate" required>
+
+                <div class="step-buttons">
+                    <button type="button" class="btn-secondary" onclick="prevStep(1)">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M13 16L7 10L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Back
+                    </button>
+                    <button type="button" class="btn-primary" onclick="nextStep(3)">
+                        Next: Add Photos
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Photos -->
+            <div class="form-section" data-step="3">
+                <h3 class="section-title">📸 Add Photos (Max 3)</h3>
+                <p class="section-desc">Upload photos or use camera to capture moments</p>
+                
+                <div class="photo-upload-area">
+                    <div class="photo-slots">
+                        <div class="photo-slot" id="photoSlot1">
+                            <input type="file" id="photoInput1" accept="image/*" capture="environment" onchange="handlePhotoUpload(1)">
+                            <label for="photoInput1" class="photo-label">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 5L10 3H14L15 5" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span>Add Photo</span>
+                            </label>
+                            <button type="button" class="remove-photo" onclick="removePhoto(1)" style="display: none;">✕</button>
+                            <img class="photo-preview" id="photoPreview1" style="display: none;">
+                        </div>
+
+                        <div class="photo-slot" id="photoSlot2" style="display: none;">
+                            <input type="file" id="photoInput2" accept="image/*" capture="environment" onchange="handlePhotoUpload(2)">
+                            <label for="photoInput2" class="photo-label">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 5L10 3H14L15 5" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span>Add Photo</span>
+                            </label>
+                            <button type="button" class="remove-photo" onclick="removePhoto(2)" style="display: none;">✕</button>
+                            <img class="photo-preview" id="photoPreview2" style="display: none;">
+                        </div>
+
+                        <div class="photo-slot" id="photoSlot3" style="display: none;">
+                            <input type="file" id="photoInput3" accept="image/*" capture="environment" onchange="handlePhotoUpload(3)">
+                            <label for="photoInput3" class="photo-label">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M9 5L10 3H14L15 5" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span>Add Photo</span>
+                            </label>
+                            <button type="button" class="remove-photo" onclick="removePhoto(3)" style="display: none;">✕</button>
+                            <img class="photo-preview" id="photoPreview3" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-buttons">
+                    <button type="button" class="btn-secondary" onclick="prevStep(2)">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M13 16L7 10L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Back
+                    </button>
+                    <button type="button" class="btn-primary" onclick="nextStep(4)">
+                        Next: Customize
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Customization -->
+            <div class="form-section" data-step="4">
+                <h3 class="section-title">✨ Extra Customization</h3>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enableMusic">
+                        Enable Background Music 🎵
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="enableSoundEffects" checked>
+                        Enable Sound Effects 🔊
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="noButtonDifficulty">No Button Difficulty</label>
+                    <select id="noButtonDifficulty">
+                        <option value="easy">Easy - Gentle moves</option>
+                        <option value="medium" selected>Medium - Playful escape</option>
+                        <option value="hard">Hard - Nearly impossible!</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="language">Language</label>
+                    <select id="language">
+                        <option value="en">English</option>
+                        <option value="krio">Krio</option>
+                    </select>
+                </div>
+
+                <div class="step-buttons">
+                    <button type="button" class="btn-secondary" onclick="prevStep(3)">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M13 16L7 10L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Back
+                    </button>
+                    <button type="button" class="btn-primary" onclick="showPreview()">
+                        Preview
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 5: Preview & Share -->
+            <div class="form-section" data-step="5">
+                <h3 class="section-title">👀 Preview & Share</h3>
+                
+                <div class="preview-container" id="previewContainer">
+                    <!-- Preview will be generated here -->
+                </div>
+
+                <div class="share-section">
+                    <p class="share-instruction">Your unique proposal link:</p>
+                    <div class="link-container">
+                        <input type="text" id="proposalLink" readonly>
+                        <button type="button" class="btn-copy" onclick="copyLink()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
+                                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
+
+                    <div class="share-buttons">
+                        <button type="button" class="btn-whatsapp" onclick="shareWhatsApp()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                            </svg>
+                            Share on WhatsApp
+                        </button>
+                        <button type="button" class="btn-secondary" onclick="downloadQR()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                                <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                                <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                                <path d="M14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" fill="currentColor"/>
+                            </svg>
+                            Get QR Code
+                        </button>
+                    </div>
+                </div>
+
+                <div class="step-buttons">
+                    <button type="button" class="btn-secondary" onclick="prevStep(4)">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M13 16L7 10L13 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        Edit
+                    </button>
+                    <button type="button" class="btn-primary" onclick="createAnother()">
+                        Create Another
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 12a8 8 0 018-8M4 12l3 3M4 12l3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Proposal View Page -->
+<div id="proposalPage" class="page">
+    <div id="proposalContent" class="proposal-view">
+        <!-- Dynamic content loaded here -->
+    </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div id="adminLogin" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeAdminLogin()">✕</button>
+        <h3>Admin Access</h3>
+        <input type="password" id="adminPassword" placeholder="Enter admin password">
+        <button class="btn-primary" onclick="verifyAdmin()">Login</button>
+        <p class="hint">Default password: summit2024</p>
+    </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="adminDashboard" class="page">
+    <div class="dashboard-wrapper">
+        <div class="dashboard-header">
+            <h2>📊 Valentine's Dashboard</h2>
+            <button class="btn-secondary" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">💌</div>
+                <div class="stat-value" id="totalProposals">0</div>
+                <div class="stat-label">Total Proposals</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="acceptedProposals">0</div>
+                <div class="stat-label">Accepted</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-value" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">👀</div>
+                <div class="stat-value" id="totalViews">0</div>
+                <div class="stat-label">Total Views</div>
+            </div>
+        </div>
+
+        <div class="dashboard-actions">
+            <button class="btn-primary" onclick="exportData()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Export Data (CSV)
+            </button>
+            <button class="btn-secondary" onclick="clearAllData()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Clear All Data
+            </button>
+        </div>
+
+        <div class="proposals-table-container">
+            <h3>Recent Proposals</h3>
+            <div class="table-wrapper">
+                <table class="proposals-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sender</th>
+                            <th>Recipient</th>
+                            <th>Template</th>
+                            <th>Status</th>
+                            <th>No Clicks</th>
+                            <th>Views</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proposalsTableBody">
+                        <!-- Dynamic rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="modal">
+    <div class="modal-content celebration">
+        <div class="confetti-container"></div>
+        <div class="success-content">
+            <div class="success-icon">💕</div>
+            <h2 id="successMessage">They said YES!</h2>
+            <p id="successSubtext">Love wins! 🎉</p>
+            <button class="btn-primary" onclick="closeSuccessModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
