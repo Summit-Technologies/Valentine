@@ -60,7 +60,7 @@ body {
     display: none;
     opacity: 0;
     transition: opacity var(--transition-normal);
-    min-height: 100vh;
+    min-height: auto;
     width: 100%;
     position: relative;
 }
@@ -86,7 +86,7 @@ body {
    LANDING PAGE
    ==================================== */
 #landingPage {
-    min-height: 100vh;
+    min-height: auto;
     height: 100vh;
     display: flex;
     align-items: center;
@@ -303,7 +303,7 @@ body {
    CREATOR PAGE
    ==================================== */
 #creatorPage {
-    min-height: 100vh;
+    min-height: auto;
     background: linear-gradient(135deg, #ffeef8 0%, #e3f2fd 100%);
     padding: 2rem 1rem;
     overflow-y: auto;
@@ -742,7 +742,7 @@ body {
    PROPOSAL VIEW PAGE
    ==================================== */
 #proposalPage {
-    min-height: 100vh;
+    min-height: auto;
     height: 100vh;
     display: flex;
     align-items: center;
@@ -1128,7 +1128,7 @@ body {
    ADMIN DASHBOARD
    ==================================== */
 #adminDashboard {
-    min-height: 100vh;
+    min-height: auto;
     background: var(--gray-light);
     overflow-y: auto;
     overflow-x: hidden;
@@ -1459,5 +1459,66 @@ html {
     }
     50% {
         transform: scale(1.05);
+    }
+}
+/* ====================================
+   WHITESPACE OPTIMIZATION OVERRIDES
+   ==================================== */
+.creator-wrapper {
+    max-width: 900px !important;
+    margin: 0 auto !important;
+    padding: 1.5rem !important;
+}
+
+.dashboard-wrapper {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 1.5rem !important;
+}
+
+.form-section {
+    padding: 1.5rem !important;
+}
+
+.page {
+    min-height: fit-content !important;
+    padding-bottom: 2rem !important;
+}
+
+.proposal-not-found {
+    min-height: 60vh !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.not-found-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+}
+
+.proposal-not-found h2 {
+    font-size: 2rem;
+    color: var(--black);
+    margin-bottom: 1rem;
+}
+
+.proposal-not-found p {
+    color: var(--gray);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .creator-wrapper,
+    .dashboard-wrapper {
+        padding: 1rem !important;
+    }
+    
+    .form-section {
+        padding: 1rem !important;
     }
 }
