@@ -262,566 +262,439 @@ function compressImage(base64, callback) {
         
         canvas.width = width;
         canvas.height = height;
-        
         ctx.drawImage(img, 0, 0, width, height);
         
-        const compressed = canvas.toDataURL('image/jpeg', 0.7);
-        callback(compressed);
+        callback(canvas.toDataURL('image/jpeg', 0.8));
     };
     img.src = base64;
 }
 
 // ====================================
-// PREVIEW & GENERATE LINK
+// MUSIC SELECTION
 // ====================================
-function showPreview() {
-    const proposalData = collectFormData();
+function selectMusic(musicId) {
+    document.querySelectorAll('.music-option').forEach(option => {
+        option.classList.remove('selected');
+    });
     
-    // Generate unique ID
-    const proposalId = generateId();
-    currentProposalId = proposalId;
+    document.querySelector(`[data-music="${musicId}"]`).classList.add('selected');
+    document.getElementById('selectedMusic').value = musicId;
     
-    // Save to localStorage
-    saveProposal(proposalId, proposalData);
-    
-    // Generate link
-    const link = `${window.location.origin}${window.location.pathname}?id=${proposalId}`;
-    document.getElementById('proposalLink').value = link;
-    
-    // Render preview
-    renderProposalPreview(proposalData);
-    
-    // Show step 5
-    nextStep(5);
+    playSound('click');
 }
 
-function collectFormData() {
+// ====================================
+// PROPOSAL CREATION
+// ====================================
+function generateProposal() {
+    if (!validateCurrentStep()) return;
+    
+    const recipientName = document.getElementById('recipientName').value;
+    const senderName = document.getElementById('senderName').value || 'Anonymous';
+    const template = document.getElementById('selectedTemplate').value;
     const messageTemplate = document.getElementById('messageTemplate').value;
     const customMessage = document.getElementById('customMessage').value;
+    const selectedMusic = document.getElementById('selectedMusic').value;
     
-    return {
-        recipientName: document.getElementById('recipientName').value,
-        senderName: document.getElementById('senderName').value || 'Anonymous',
-        message: messageTemplate === 'custom' ? customMessage : messageTemplate,
-        template: document.getElementById('selectedTemplate').value,
+    const message = messageTemplate === 'custom' ? customMessage : messageTemplate;
+    
+    const proposalId = 'prop_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    const proposalData = {
+        recipientName,
+        senderName,
+        template,
+        message,
+        music: selectedMusic,
         photos: uploadedPhotos.filter(p => p !== null),
-        enableMusic: document.getElementById('enableMusic').checked,
-        enableSoundEffects: document.getElementById('enableSoundEffects').checked,
-        noButtonDifficulty: document.getElementById('noButtonDifficulty').value,
-        language: document.getElementById('language').value,
         createdAt: new Date().toISOString(),
-        status: 'pending',
         views: 0,
-        noClicks: 0,
-        yesClicked: false
+        yesClicked: false,
+        noClicks: 0
     };
-}
-
-function renderProposalPreview(data) {
-    const container = document.getElementById('previewContainer');
     
-    container.innerHTML = `
-        <div class="proposal-view template-${data.template}-view" style="width: 100%; max-width: 500px; min-height: 400px;">
-            <div class="proposal-message">
-                <h1 class="proposal-recipient">${data.recipientName}</h1>
-                <p class="proposal-text">${data.message}</p>
-            </div>
-            ${data.photos.length > 0 ? `
-                <div class="proposal-photos">
-                    ${data.photos.map(photo => `
-                        <div class="proposal-photo">
-                            <img src="${photo}" alt="Memory">
-                        </div>
-                    `).join('')}
-                </div>
-            ` : ''}
-            <div class="proposal-buttons" style="position: relative; height: 80px;">
-                <button class="btn-yes" style="position: relative; z-index: 1;">Yes! 💕</button>
-                <button class="btn-no" disabled>No 😢</button>
-            </div>
-            <div style="text-align: center; margin-top: 2rem; color: white; font-size: 0.9rem; opacity: 0.8;">
-                Preview Mode - No button is disabled
-            </div>
-        </div>
-    `;
+    // Save proposal with better error handling
+    try {
+        saveProposal(proposalId, proposalData);
+        currentProposalId = proposalId;
+        
+        // Generate shareable URL - THIS IS THE FIX
+        const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+        const shareUrl = `${baseUrl}?id=${proposalId}`;
+        
+        // Encode the proposal data in the URL for sharing
+        const encodedData = btoa(JSON.stringify(proposalData));
+        const fullShareUrl = `${baseUrl}?id=${proposalId}&data=${encodedData}`;
+        
+        document.getElementById('shareLink').value = fullShareUrl;
+        
+        nextStep(4);
+        playSound('success');
+        
+    } catch (error) {
+        console.error('Error creating proposal:', error);
+        alert('Failed to create proposal. Please try again.');
+    }
 }
 
-// ====================================
-// LINK SHARING
-// ====================================
-function copyLink() {
-    const linkInput = document.getElementById('proposalLink');
+function copyShareLink() {
+    const linkInput = document.getElementById('shareLink');
     linkInput.select();
     linkInput.setSelectionRange(0, 99999);
     
-    navigator.clipboard.writeText(linkInput.value).then(() => {
-        const btn = event.target.closest('.btn-copy');
+    try {
+        document.execCommand('copy');
+        
+        const btn = event.target.closest('button');
         const originalText = btn.innerHTML;
         btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Copied!';
-        btn.style.background = 'var(--success)';
-        btn.style.color = 'white';
         
         setTimeout(() => {
             btn.innerHTML = originalText;
-            btn.style.background = '';
-            btn.style.color = '';
         }, 2000);
         
         playSound('success');
-    });
+    } catch (err) {
+        alert('Failed to copy link. Please copy manually.');
+    }
 }
 
 function shareWhatsApp() {
-    const link = document.getElementById('proposalLink').value;
+    const shareUrl = document.getElementById('shareLink').value;
     const recipientName = document.getElementById('recipientName').value;
-    const message = `💘 Someone has a special Valentine's question for ${recipientName}! Open this link to see: ${link}`;
+    const message = `💘 Someone has a special Valentine's message for ${recipientName}! 💝\n\nClick here to see it: ${shareUrl}`;
+    
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
 }
 
 function downloadQR() {
-    const link = document.getElementById('proposalLink').value;
-    
-    // Create QR code container
+    const shareUrl = document.getElementById('shareLink').value;
     const qrContainer = document.createElement('div');
-    qrContainer.style.padding = '20px';
-    qrContainer.style.background = 'white';
-    qrContainer.style.borderRadius = '16px';
+    qrContainer.id = 'qrCode';
     
-    // Generate QR code
     new QRCode(qrContainer, {
-        text: link,
+        text: shareUrl,
         width: 256,
         height: 256,
         colorDark: '#ff1744',
-        colorLight: '#ffffff'
+        colorLight: '#ffffff',
     });
     
-    // Download as image
     setTimeout(() => {
         const canvas = qrContainer.querySelector('canvas');
-        const url = canvas.toDataURL('image/png');
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'valentine-qr-code.png';
-        a.click();
+        const link = document.createElement('a');
+        link.download = 'valentine-qr-code.png';
+        link.href = canvas.toDataURL();
+        link.click();
         
         playSound('success');
-    }, 100);
+    }, 500);
 }
 
-// ====================================
-// RESET FORM
-// ====================================
+function createAnother() {
+    resetForm();
+    nextStep(1);
+}
+
 function resetForm() {
-    document.getElementById('proposalForm').reset();
-    uploadedPhotos = [];
-    currentStep = 1;
+    document.getElementById('recipientName').value = '';
+    document.getElementById('senderName').value = '';
+    document.getElementById('messageTemplate').value = 'Will you be my Valentine?';
+    document.getElementById('customMessage').value = '';
+    document.getElementById('customMessageGroup').style.display = 'none';
+    document.getElementById('selectedTemplate').value = '';
+    document.getElementById('selectedMusic').value = 'none';
     
-    // Reset photo slots
+    uploadedPhotos = [];
+    
     for (let i = 1; i <= MAX_PHOTOS; i++) {
-        const preview = document.getElementById(`photoPreview${i}`);
-        const label = document.querySelector(`#photoSlot${i} .photo-label`);
-        const removeBtn = document.querySelector(`#photoSlot${i} .remove-photo`);
-        
-        if (preview) preview.style.display = 'none';
-        if (label) label.style.display = 'flex';
-        if (removeBtn) removeBtn.style.display = 'none';
-        
+        removePhoto(i);
         if (i > 1) {
             document.getElementById(`photoSlot${i}`).style.display = 'none';
         }
     }
     
-    // Reset template selection
     document.querySelectorAll('.template-card').forEach(card => {
         card.classList.remove('selected');
     });
     
-    // Show first step
-    document.querySelectorAll('.form-section').forEach(section => {
-        section.classList.remove('active');
+    document.querySelectorAll('.music-option').forEach(option => {
+        option.classList.remove('selected');
     });
-    document.querySelector('[data-step="1"]').classList.add('active');
-}
-
-function createAnother() {
-    resetForm();
-    showCreator();
+    
+    currentStep = 1;
 }
 
 // ====================================
-// PROPOSAL VIEW
+// PROPOSAL VIEWING - FIXED FOR URL SHARING
 // ====================================
 function loadProposal() {
     const urlParams = new URLSearchParams(window.location.search);
     const proposalId = urlParams.get('id');
+    const encodedData = urlParams.get('data');
     
     if (!proposalId) {
-        showLanding();
+        showNotFound();
         return;
     }
     
-    const proposal = getProposal(proposalId);
+    let proposal = null;
     
+    // First, try to get from URL-encoded data (for sharing)
+    if (encodedData) {
+        try {
+            proposal = JSON.parse(atob(encodedData));
+            // Save it to localStorage for future views
+            saveProposal(proposalId, proposal);
+        } catch (e) {
+            console.error('Error decoding proposal data:', e);
+        }
+    }
+    
+    // If no encoded data, try localStorage
     if (!proposal) {
-        alert('Proposal not found!');
-        showLanding();
+        proposal = getProposal(proposalId);
+    }
+    
+    // If still no proposal found
+    if (!proposal) {
+        showNotFound();
         return;
     }
     
-    // Increment views
-    proposal.views++;
-    updateProposal(proposalId, proposal);
+    // Increment view count
+    proposal.views = (proposal.views || 0) + 1;
+    saveProposal(proposalId, proposal);
+    currentProposalId = proposalId;
     
-    renderProposal(proposalId, proposal);
+    renderProposal(proposal);
     showPage('proposalPage');
-    
-    // Play background music if enabled
-    if (proposal.enableMusic) {
-        playBackgroundMusic();
-    }
 }
 
-function renderProposal(proposalId, data) {
-    const container = document.getElementById('proposalContent');
-    
-    const translations = {
-        en: {
-            yes: 'Yes! 💕',
-            no: 'No 😢'
-        },
-        krio: {
-            yes: 'Yes! 💕',
-            no: 'No 😢'
-        }
-    };
-    
-    const lang = data.language || 'en';
-    
-    container.className = `proposal-view template-${data.template}-view`;
-    container.innerHTML = `
-        <div class="no-counter" style="display: none;">
-            Escape attempts: <span id="noClickCount">0</span>
+function showNotFound() {
+    showPage('proposalPage');
+    const content = document.getElementById('proposalContent');
+    content.innerHTML = `
+        <div class="proposal-not-found">
+            <div class="not-found-icon">💔</div>
+            <h2>Proposal Not Found</h2>
+            <p>This proposal link may be invalid or expired.</p>
+            <button class="btn-primary" onclick="window.location.href='index.html'">
+                Create Your Own Proposal
+            </button>
         </div>
-        
-        <div class="proposal-message">
-            <h1 class="proposal-recipient">${data.recipientName}</h1>
-            <p class="proposal-text">${data.message}</p>
-            ${data.senderName !== 'Anonymous' ? `<p class="proposal-text" style="font-size: 1.5rem; margin-top: 1rem;">- ${data.senderName}</p>` : ''}
-        </div>
-        
-        ${data.photos.length > 0 ? `
+    `;
+}
+
+function renderProposal(proposal) {
+    const content = document.getElementById('proposalContent');
+    const template = proposal.template || 'romantic-sunset';
+    
+    // Build photo gallery HTML
+    let photosHTML = '';
+    if (proposal.photos && proposal.photos.length > 0) {
+        photosHTML = `
             <div class="proposal-photos">
-                ${data.photos.map(photo => `
+                ${proposal.photos.map(photo => `
                     <div class="proposal-photo">
                         <img src="${photo}" alt="Memory">
                     </div>
                 `).join('')}
             </div>
-        ` : ''}
-        
-        <div class="proposal-buttons" style="position: relative; min-height: 100px;">
-            <button class="btn-yes" onclick="handleYes('${proposalId}')">${translations[lang].yes}</button>
-            <button class="btn-no" id="noButton" onclick="handleNo('${proposalId}', '${data.noButtonDifficulty}')">${translations[lang].no}</button>
-        </div>
-        
-        <div class="summit-badge" style="margin-top: 3rem;">
-            <p style="color: white; opacity: 0.7;">Powered by <strong>Summit Technologies</strong></p>
+        `;
+    }
+    
+    // Render proposal view
+    content.innerHTML = `
+        <div class="proposal-template ${template}">
+            <div class="proposal-background"></div>
+            <div class="proposal-container">
+                <div class="proposal-heart-logo">💘</div>
+                <h1 class="proposal-recipient">${proposal.recipientName}</h1>
+                <div class="proposal-message">${proposal.message}</div>
+                ${photosHTML}
+                <div class="proposal-sender">- From ${proposal.senderName}</div>
+                <div class="proposal-buttons">
+                    <button class="btn-yes" onclick="handleYes()">
+                        Yes! 💕
+                    </button>
+                    <button class="btn-no" onclick="handleNo()">
+                        No
+                    </button>
+                </div>
+            </div>
         </div>
     `;
     
-    // Initialize no button behavior
-    initializeNoButton(proposalId, data.noButtonDifficulty, data.enableSoundEffects);
-}
-
-// ====================================
-// NO BUTTON BEHAVIOR
-// ====================================
-function initializeNoButton(proposalId, difficulty, soundEnabled) {
-    const noButton = document.getElementById('noButton');
-    const container = noButton.parentElement;
-    
-    const difficultySettings = {
-        easy: { speed: 300, distance: 100 },
-        medium: { speed: 200, distance: 150 },
-        hard: { speed: 100, distance: 200 }
-    };
-    
-    const settings = difficultySettings[difficulty] || difficultySettings.medium;
-    
-    // Mouse enter event
-    noButton.addEventListener('mouseenter', () => {
-        moveNoButton();
-        if (soundEnabled) playSound('no');
-    });
-    
-    // Touch start for mobile
-    noButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        moveNoButton();
-        if (soundEnabled) playSound('no');
-    });
-    
-    function moveNoButton() {
-        const containerRect = container.getBoundingClientRect();
-        const buttonRect = noButton.getBoundingClientRect();
-        
-        let newX, newY;
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        do {
-            newX = Math.random() * (containerRect.width - buttonRect.width);
-            newY = Math.random() * (containerRect.height - buttonRect.height);
-            attempts++;
-        } while (attempts < maxAttempts && (
-            Math.abs(newX - (buttonRect.left - containerRect.left)) < settings.distance ||
-            Math.abs(newY - (buttonRect.top - containerRect.top)) < settings.distance
-        ));
-        
-        noButton.style.transition = `all ${settings.speed}ms ease`;
-        noButton.style.left = `${newX}px`;
-        noButton.style.top = `${newY}px`;
-        noButton.style.transform = 'none';
-        
-        // Update counter
-        noButtonAttempts++;
-        document.getElementById('noClickCount').textContent = noButtonAttempts;
-        document.querySelector('.no-counter').style.display = 'block';
-        
-        // Update in localStorage
-        const proposal = getProposal(proposalId);
-        proposal.noClicks = noButtonAttempts;
-        updateProposal(proposalId, proposal);
-        
-        // Add shake animation
-        if (noButtonAttempts % 5 === 0) {
-            noButton.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                noButton.style.animation = '';
-            }, 500);
-        }
-        
-        // Add size change on higher attempts
-        if (noButtonAttempts > 10) {
-            noButton.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
-        }
-        
-        // Make it transparent occasionally
-        if (noButtonAttempts > 15 && Math.random() > 0.7) {
-            noButton.style.opacity = '0.3';
-            setTimeout(() => {
-                noButton.style.opacity = '1';
-            }, 500);
-        }
+    // Play music if selected
+    if (proposal.music && proposal.music !== 'none') {
+        playBackgroundMusic(proposal.music);
     }
+    
+    // Add template-specific animations
+    addTemplateAnimations(template);
 }
 
-function handleNo(proposalId, difficulty) {
-    // This function is called if they actually manage to click it
-    noButtonAttempts++;
-    const proposal = getProposal(proposalId);
-    proposal.noClicks = noButtonAttempts;
-    updateProposal(proposalId, proposal);
+function addTemplateAnimations(template) {
+    const container = document.querySelector('.proposal-container');
     
-    alert('Nice try! But think again... 😊');
+    setTimeout(() => {
+        container.style.animation = 'slideInScale 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
+    }, 100);
 }
 
-function handleYes(proposalId) {
-    // Update proposal status
-    const proposal = getProposal(proposalId);
-    proposal.status = 'accepted';
-    proposal.yesClicked = true;
-    proposal.acceptedAt = new Date().toISOString();
-    updateProposal(proposalId, proposal);
-    
-    // Trigger confetti
-    triggerConfetti();
-    
-    // Play success sound
-    playSound('celebration');
+// ====================================
+// PROPOSAL RESPONSES
+// ====================================
+function handleYes() {
+    const proposal = getProposal(currentProposalId);
+    if (proposal) {
+        proposal.yesClicked = true;
+        saveProposal(currentProposalId, proposal);
+    }
     
     // Show success modal
-    setTimeout(() => {
-        showSuccessModal(proposal);
-    }, 1000);
+    document.getElementById('successModal').classList.add('active');
+    document.getElementById('successMessage').textContent = 'They said YES! 💕';
+    document.getElementById('successSubtext').textContent = 'Love wins! 🎉';
+    
+    // Confetti celebration
+    launchConfetti();
+    playSound('success');
 }
 
-function showSuccessModal(proposal) {
-    const modal = document.getElementById('successModal');
-    document.getElementById('successMessage').textContent = 'They said YES! 💕';
-    document.getElementById('successSubtext').textContent = `${proposal.recipientName} accepted! Love wins! 🎉`;
-    modal.classList.add('active');
+function handleNo() {
+    const proposal = getProposal(currentProposalId);
+    if (proposal) {
+        proposal.noClicks = (proposal.noClicks || 0) + 1;
+        saveProposal(currentProposalId, proposal);
+    }
+    
+    noButtonAttempts++;
+    const noBtn = document.querySelector('.btn-no');
+    
+    if (noButtonAttempts < 3) {
+        // Move button to random position
+        const container = document.querySelector('.proposal-buttons');
+        const containerRect = container.getBoundingClientRect();
+        const btnRect = noBtn.getBoundingClientRect();
+        
+        const maxX = containerRect.width - btnRect.width;
+        const maxY = containerRect.height - btnRect.height;
+        
+        const randomX = Math.random() * maxX;
+        const randomY = Math.random() * maxY;
+        
+        noBtn.style.position = 'absolute';
+        noBtn.style.left = randomX + 'px';
+        noBtn.style.top = randomY + 'px';
+        noBtn.style.transform = 'none';
+        
+        playSound('click');
+    } else if (noButtonAttempts === 3) {
+        noBtn.textContent = 'Are you sure? 🥺';
+        noBtn.style.fontSize = '0.9rem';
+    } else if (noButtonAttempts === 4) {
+        noBtn.textContent = 'Really? 💔';
+        noBtn.style.backgroundColor = 'var(--gray)';
+    } else {
+        // After many attempts, make Yes button bigger and more appealing
+        const yesBtn = document.querySelector('.btn-yes');
+        yesBtn.style.transform = 'scale(1.2)';
+        yesBtn.style.animation = 'pulse 1s infinite';
+        yesBtn.textContent = 'YES! Please! 💝';
+        
+        noBtn.style.display = 'none';
+    }
 }
 
 function closeSuccessModal() {
     document.getElementById('successModal').classList.remove('active');
+    noButtonAttempts = 0;
 }
 
 // ====================================
-// CONFETTI ANIMATION
+// CONFETTI EFFECT
 // ====================================
-function triggerConfetti() {
-    const duration = 3000;
+function launchConfetti() {
+    const duration = 3 * 1000;
     const end = Date.now() + duration;
-    
-    const colors = ['#ff1744', '#f50057', '#ff80ab', '#ff4081'];
-    
+
     (function frame() {
         confetti({
-            particleCount: 2,
+            particleCount: 7,
             angle: 60,
             spread: 55,
             origin: { x: 0 },
-            colors: colors
+            colors: ['#ff1744', '#ff80ab', '#f50057', '#ff6b9d']
         });
+        
         confetti({
-            particleCount: 2,
+            particleCount: 7,
             angle: 120,
             spread: 55,
             origin: { x: 1 },
-            colors: colors
+            colors: ['#ff1744', '#ff80ab', '#f50057', '#ff6b9d']
         });
-        
+
         if (Date.now() < end) {
             requestAnimationFrame(frame);
         }
     }());
-    
-    // Heart burst
-    setTimeout(() => {
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: colors,
-            shapes: ['circle'],
-            scalar: 2
-        });
-    }, 500);
 }
 
 // ====================================
 // SOUND EFFECTS
 // ====================================
-const sounds = {
-    click: () => playBeep(200, 0.1, 'sine'),
-    upload: () => playBeep(400, 0.15, 'sine'),
-    success: () => {
-        playBeep(523, 0.1, 'sine');
-        setTimeout(() => playBeep(659, 0.1, 'sine'), 100);
-        setTimeout(() => playBeep(784, 0.2, 'sine'), 200);
-    },
-    celebration: () => {
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => playBeep(400 + i * 100, 0.1, 'sine'), i * 100);
-        }
-    },
-    no: () => playBeep(150, 0.1, 'square')
-};
-
 function playSound(type) {
-    if (sounds[type]) {
-        sounds[type]();
-    }
-}
-
-function playBeep(frequency, duration, type = 'sine') {
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator.frequency.value = frequency;
-        oscillator.type = type;
-        
-        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + duration);
-    } catch (e) {
-        console.log('Audio not supported');
-    }
-}
-
-function playBackgroundMusic() {
-    // Simple romantic melody
-    const melody = [
-        { freq: 523.25, duration: 0.5 },
-        { freq: 587.33, duration: 0.5 },
-        { freq: 659.25, duration: 0.5 },
-        { freq: 698.46, duration: 1 }
-    ];
+    // Simple beep sounds using Web Audio API
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
     
-    let delay = 0;
-    melody.forEach(note => {
-        setTimeout(() => playBeep(note.freq, note.duration, 'sine'), delay);
-        delay += note.duration * 1000;
-    });
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    if (type === 'click') {
+        oscillator.frequency.value = 800;
+        gainNode.gain.value = 0.1;
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } else if (type === 'success') {
+        oscillator.frequency.value = 1200;
+        gainNode.gain.value = 0.15;
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.2);
+    } else if (type === 'upload') {
+        oscillator.frequency.value = 600;
+        gainNode.gain.value = 0.1;
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.15);
+    }
+}
+
+function playBackgroundMusic(musicId) {
+    // Placeholder for background music
+    // In production, you would load actual audio files here
+    console.log('Playing music:', musicId);
 }
 
 // ====================================
-// LOCAL STORAGE MANAGEMENT
+// LOCAL STORAGE FUNCTIONS
 // ====================================
-function generateId() {
-    return 'prop_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
 function saveProposal(id, data) {
     try {
-        // Get existing proposals
         const proposals = getAllProposals();
-        
-        // Add timestamp if not exists
-        if (!data.createdAt) {
-            data.createdAt = new Date().toISOString();
-        }
-        
-        // Add metadata
-        data.lastUpdated = new Date().toISOString();
-        data.version = '1.0';
-        
-        // Save proposal
         proposals[id] = data;
-        
-        // Convert to JSON string
-        const jsonString = JSON.stringify(proposals);
-        
-        // Check size (localStorage limit is ~5-10MB)
-        const sizeInBytes = new Blob([jsonString]).size;
-        const sizeInMB = sizeInBytes / (1024 * 1024);
-        
-        if (sizeInMB > 4) {
-            console.warn('Storage approaching limit. Consider clearing old proposals.');
-            alert('Storage is getting full. You may want to export and clear old proposals from admin dashboard.');
-        }
-        
-        // Save to localStorage
-        localStorage.setItem('valentineProposals', jsonString);
-        
-        // Verify save was successful
-        const saved = localStorage.getItem('valentineProposals');
-        if (!saved) {
-            throw new Error('Failed to verify saved data');
-        }
-        
-        console.log(`✅ Proposal ${id} saved successfully (${sizeInMB.toFixed(2)}MB used)`);
+        localStorage.setItem('valentineProposals', JSON.stringify(proposals));
+        createAutoBackup(proposals);
         return true;
     } catch (e) {
         console.error('Error saving proposal:', e);
-        
-        // Show user-friendly error
         if (e.name === 'QuotaExceededError') {
-            alert('Storage is full! Please clear old proposals from the admin dashboard or use a different browser.');
-        } else {
-            alert('Error saving proposal. Please try again or use a different browser.');
+            alert('Storage limit exceeded. Please delete some old proposals.');
         }
-        
         return false;
     }
 }
@@ -836,24 +709,12 @@ function getProposal(id) {
     }
 }
 
-function updateProposal(id, data) {
-    return saveProposal(id, data);
-}
-
 function getAllProposals() {
     try {
         const data = localStorage.getItem('valentineProposals');
-        const proposals = data ? JSON.parse(data) : {};
-        
-        // Create automatic backup every 10 proposals
-        const proposalCount = Object.keys(proposals).length;
-        if (proposalCount > 0 && proposalCount % 10 === 0) {
-            createAutoBackup(proposals);
-        }
-        
-        return proposals;
+        return data ? JSON.parse(data) : {};
     } catch (e) {
-        console.error('Error getting proposals:', e);
+        console.error('Error reading proposals:', e);
         
         // Try to recover from backup
         const backup = localStorage.getItem('valentineProposals_backup');
